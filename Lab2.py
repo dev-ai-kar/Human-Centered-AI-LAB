@@ -35,13 +35,14 @@ use_advanced_model = st.sidebar.checkbox(
 model_name = "gpt-4-turbo" if use_advanced_model else "gpt-3.5-turbo"
 st.sidebar.markdown(f"**Selected Model:** `{model_name}`")
 
-# Ask user for their OpenAI API key via `st.text_input`.
-# Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
-# via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
-openai_api_key = st.text_input("OpenAI API Key", type="password")
-if not openai_api_key:
-    st.info("Please add your OpenAI API key to continue.", icon="🗝️")
-else:
+# Get OpenAI API key from Streamlit secrets
+try:
+    openai_api_key = st.secrets["OPENAI_API_KEY"]
+except KeyError:
+    st.error("OpenAI API key not found in secrets. Please configure it in `.streamlit/secrets.toml`", icon="🗝️")
+    st.stop()
+
+if openai_api_key:
 
     # Create an OpenAI client.
     client = OpenAI(api_key=openai_api_key)
