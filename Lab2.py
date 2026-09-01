@@ -8,6 +8,33 @@ st.write(
     "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
 )
 
+# Sidebar: Summary options and model selection
+st.sidebar.header("⚙️ Options")
+
+# Summary options
+st.sidebar.subheader("📝 Summary Format")
+summary_option = st.sidebar.radio(
+    "Choose a summary format:",
+    options=[
+        "None",
+        "100 words",
+        "2 connecting paragraphs",
+        "5 bullet points"
+    ],
+    index=0
+)
+
+# Model selection
+st.sidebar.subheader("🤖 Model Selection")
+use_advanced_model = st.sidebar.checkbox(
+    "Use advanced model",
+    value=False,
+    help="Check to use GPT-4 Turbo (advanced). Uncheck to use GPT-3.5 Turbo (basic)."
+)
+
+model_name = "gpt-4-turbo" if use_advanced_model else "gpt-3.5-turbo"
+st.sidebar.markdown(f"**Selected Model:** `{model_name}`")
+
 # Ask user for their OpenAI API key via `st.text_input`.
 # Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
 # via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
@@ -31,20 +58,32 @@ else:
         disabled=not uploaded_file,
     )
 
-    if uploaded_file and question:
+    if uploaded_file and (question or summary_option != "None"):
 
         # Process the uploaded file and question.
         document = uploaded_file.read().decode()
+        
+        # Build the prompt based on summary option
+        if summary_option != "None":
+            if summary_option == "100 words":
+                prompt = f"Please summarize the following document in exactly 100 words:\n\n{document}"
+            elif summary_option == "2 connecting paragraphs":
+                prompt = f"Please summarize the following document in 2 well-connected paragraphs:\n\n{document}"
+            elif summary_option == "5 bullet points":
+                prompt = f"Please summarize the following document in 5 bullet points:\n\n{document}"
+        else:
+            prompt = question
+        
         messages = [
             {
                 "role": "user",
-                "content": f"Here's a document: {document} \n\n---\n\n {question}",
+                "content": f"Here's a document: {document} \n\n---\n\n {prompt}",
             }
         ]
 
         # Generate an answer using the OpenAI API.
         stream = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=model_name,
             messages=messages,
             stream=True,
         )
