@@ -29,10 +29,10 @@ st.sidebar.subheader("🤖 Model Selection")
 use_advanced_model = st.sidebar.checkbox(
     "Use advanced model",
     value=False,
-    help="Check to use GPT-4 Turbo (advanced). Uncheck to use GPT-3.5 Turbo (basic)."
+    help="Check to use gpt-5-mini (advanced). Uncheck to use gpt-5-nano (basic)."
 )
 
-model_name = "gpt-4-turbo" if use_advanced_model else "gpt-3.5-turbo"
+model_name = "gpt-5-mini" if use_advanced_model else "gpt-5-nano"
 st.sidebar.markdown(f"**Selected Model:** `{model_name}`")
 
 # Get OpenAI API key from Streamlit secrets
