@@ -67,18 +67,18 @@ if openai_api_key:
         # Build the prompt based on summary option
         if summary_option != "None":
             if summary_option == "100 words":
-                prompt = f"Please summarize the following document in exactly 100 words:\n\n{document}"
+                prompt = "Please summarize the following document in exactly 100 words."
             elif summary_option == "2 connecting paragraphs":
-                prompt = f"Please summarize the following document in 2 well-connected paragraphs:\n\n{document}"
+                prompt = "Please summarize the following document in 2 well-connected paragraphs."
             elif summary_option == "5 bullet points":
-                prompt = f"Please summarize the following document in 5 bullet points:\n\n{document}"
+                prompt = "Please summarize the following document in 5 bullet points."
         else:
             prompt = question
         
         messages = [
             {
                 "role": "user",
-                "content": f"Here's a document: {document} \n\n---\n\n {prompt}",
+                "content": f"Here's a document:\n\n{document}\n\n---\n\n{prompt}",
             }
         ]
 
