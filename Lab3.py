@@ -4,13 +4,25 @@ from openai import OpenAI
 
 # Show title and description.
 st.title("Conversational AI")
-st.write("Ask questions and get answers from GPT. This chatbot uses a turn-based buffer.")
+st.write(
+    "Ask questions and get answers from GPT. This chatbot uses a turn-based "
+    "buffer with a maximum context token limit."
+)
 
 model_to_use = st.sidebar.selectbox(
     "Which model?", ("gpt-4o-mini", "gpt-4o"), index=0
 )
 max_tokens = st.sidebar.number_input(
-    "Maximum context tokens", min_value=256, max_value=128000, value=4000, step=256
+    "Maximum context tokens",
+    min_value=256,
+    max_value=128000,
+    value=4000,
+    step=256,
+    help=(
+        "Sets the maximum number of conversation tokens sent to the model. "
+        "A higher value keeps more recent history, while a lower value uses "
+        "less context."
+    ),
 )
 
 if "messages" not in st.session_state:
