@@ -4,7 +4,7 @@ from openai import OpenAI
 
 # Show title and description.
 st.title("Conversational AI")
-st.write("Ask questions and get answers from GPT.")
+st.write("Ask questions and get answers from GPT. This chatbot uses a turn-based buffer.")
 
 model_to_use = st.sidebar.selectbox(
     "Which model?", ("gpt-4o-mini", "gpt-4o"), index=0
