@@ -14,7 +14,22 @@ max_tokens = st.sidebar.number_input(
 )
 
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [
+        {"role": "assistant", "content": "What can I help you with?"}
+    ]
+
+SYSTEM_MESSAGE = {
+    "role": "system",
+    "content": (
+        "You are a helpful assistant speaking to a 10-year-old. "
+        "Use simple words, short sentences, and friendly examples. "
+        "First, answer the user's question clearly. After every answer, "
+        "ask exactly: Do you want more info? If the user says yes, give "
+        "useful additional information in simple language, then ask exactly "
+        "again: Do you want more info? If the user says no, reply exactly: "
+        "What can I help you with? Then wait for a new question."
+    ),
+}
 
 
 def count_tokens(messages, model):
@@ -30,12 +45,8 @@ def count_tokens(messages, model):
 
 
 def conversation_buffer(messages, token_limit, model):
-    """Return the newest complete two-turn history within the token limit."""
-    system_message = {
-        "role": "system",
-        "content": "You are a helpful assistant.",
-    }
-    buffered_messages = [system_message]
+    """Return the system prompt and newest complete two-turn history."""
+    buffered_messages = [SYSTEM_MESSAGE]
     history = messages[-4:]
 
     for message in history:
