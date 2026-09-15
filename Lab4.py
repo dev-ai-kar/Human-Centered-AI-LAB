@@ -72,11 +72,12 @@ if "openai_client" not in st.session_state:
     st.session_state.openai_client = OpenAI(api_key=openai_api_key)
 
 # Persistent ChromaDB collection stored in the project directory, not in session state.
-chroma_client = chromadb.PersistentClient(path="./ChromaDB_for_Lab")
-collection = chroma_client.get_or_create_collection("Lab4Collection")
+collection = create_collection()
 
-if collection.count() == 0:
-    load_pdfs_to_collection(PDF_FOLDER, collection)
+loaded_count = collection.count()
+if loaded_count == 0:
+    loaded_files = load_pdfs_to_collection(PDF_FOLDER, collection)
+    loaded_count = len(loaded_files)
 
 # Show title and description.
 st.title("Lab 4: Chatbot using RAG")
@@ -84,6 +85,11 @@ st.write(
     "Ask questions and get answers from GPT. This chatbot uses a turn-based "
     "buffer with a maximum context token limit."
 )
+
+if loaded_count > 0:
+    st.success(f"ChromaDB collection loaded successfully: {loaded_count} document(s) ready.")
+else:
+    st.warning("ChromaDB collection is empty. No documents were loaded yet.")
 
 # # QUERYING A COLLECTION - ONLY USED FOR TESTING
 
