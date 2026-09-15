@@ -10,7 +10,7 @@ sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
 import chromadb
 import tiktoken
 from openai import OpenAI
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 
 
 EMBEDDING_MODEL = "text-embedding-3-small"
