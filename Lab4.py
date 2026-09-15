@@ -58,12 +58,62 @@ def load_pdfs_to_collection(folder_path, collection):
 
     return loaded_files
 
+try:
+    openai_api_key = st.secrets["OPENAI_API_KEY"]
+except KeyError:
+    st.error(
+        "OpenAI API key not found in secrets. Please configure it in "
+        "`.streamlit/secrets.toml`",
+        icon="🗝️",
+    )
+    st.stop()
+
+if "openai_client" not in st.session_state:
+    st.session_state.openai_client = OpenAI(api_key=openai_api_key)
+
+if "lab4_collection" not in st.session_state:
+    st.session_state.lab4_collection = create_collection()
+
+collection = st.session_state.lab4_collection
+if collection.count() == 0:
+    load_pdfs_to_collection(PDF_FOLDER, collection)
+
 # Show title and description.
-st.title("Conversational AI")
+st.title("Lab 4: Chatbot using RAG")
 st.write(
     "Ask questions and get answers from GPT. This chatbot uses a turn-based "
     "buffer with a maximum context token limit."
 )
+
+# QUERYING A COLLECTION - ONLY USED FOR TESTING
+
+topic = st.sidebar.text_input(
+    "Topic",
+    placeholder="Type your topic (e.g., GenAI) ...",
+)
+
+if topic:
+    client = st.session_state.openai_client
+    response = client.embeddings.create(
+        input=topic,
+        model=EMBEDDING_MODEL,
+    )
+
+    query_embedding = response.data[0].embedding
+    results = collection.query(
+        query_embeddings=[query_embedding],
+        n_results=3,
+    )
+
+    st.subheader(f"Results for: {topic}")
+
+    for i in range(len(results["documents"][0])):
+        doc = results["documents"][0][i]
+        doc_id = results["ids"][0][i]
+        st.write(f"**{i + 1}. {doc_id}**")
+        st.write(doc)
+else:
+    st.sidebar.info("Enter a topic in the sidebar to search the collection")
 
 model_to_use = st.sidebar.selectbox(
     "Which model?", ("gpt-4o-mini", "gpt-4o"), index=0
@@ -125,19 +175,8 @@ def conversation_buffer(messages, token_limit, model):
 
     return buffered_messages
 
-# Get the OpenAI API key from Streamlit secrets.
-try:
-    openai_api_key = st.secrets["OPENAI_API_KEY"]
-except KeyError:
-    st.error(
-        "OpenAI API key not found in secrets. Please configure it in "
-        "`.streamlit/secrets.toml`",
-        icon="🗝️",
-    )
-    st.stop()
-
 if openai_api_key:
-    client = OpenAI(api_key=openai_api_key)
+    client = st.session_state.openai_client
 
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
