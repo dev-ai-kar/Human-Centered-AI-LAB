@@ -71,10 +71,10 @@ except KeyError:
 if "openai_client" not in st.session_state:
     st.session_state.openai_client = OpenAI(api_key=openai_api_key)
 
-if "lab4_collection" not in st.session_state:
-    st.session_state.lab4_collection = create_collection()
+# Persistent ChromaDB collection stored in the project directory, not in session state.
+chroma_client = chromadb.PersistentClient(path="./ChromaDB_for_Lab")
+collection = chroma_client.get_or_create_collection("Lab4Collection")
 
-collection = st.session_state.lab4_collection
 if collection.count() == 0:
     load_pdfs_to_collection(PDF_FOLDER, collection)
 
@@ -85,35 +85,35 @@ st.write(
     "buffer with a maximum context token limit."
 )
 
-# QUERYING A COLLECTION - ONLY USED FOR TESTING
+# # QUERYING A COLLECTION - ONLY USED FOR TESTING
 
-topic = st.sidebar.text_input(
-    "Topic",
-    placeholder="Type your topic (e.g., GenAI) ...",
-)
+# topic = st.sidebar.text_input(
+#     "Topic",
+#     placeholder="Type your topic (e.g., GenAI) ...",
+# )
 
-if topic:
-    client = st.session_state.openai_client
-    response = client.embeddings.create(
-        input=topic,
-        model=EMBEDDING_MODEL,
-    )
+# if topic:
+#     client = st.session_state.openai_client
+#     response = client.embeddings.create(
+#         input=topic,
+#         model=EMBEDDING_MODEL,
+#     )
 
-    query_embedding = response.data[0].embedding
-    results = collection.query(
-        query_embeddings=[query_embedding],
-        n_results=3,
-    )
+#     query_embedding = response.data[0].embedding
+#     results = collection.query(
+#         query_embeddings=[query_embedding],
+#         n_results=3,
+#     )
 
-    st.subheader(f"Results for: {topic}")
+#     st.subheader(f"Results for: {topic}")
 
-    for i in range(len(results["documents"][0])):
-        doc = results["documents"][0][i]
-        doc_id = results["ids"][0][i]
-        st.write(f"**{i + 1}. {doc_id}**")
-        st.write(doc)
-else:
-    st.sidebar.info("Enter a topic in the sidebar to search the collection")
+#     for i in range(len(results["documents"][0])):
+#         doc = results["documents"][0][i]
+#         doc_id = results["ids"][0][i]
+#         st.write(f"**{i + 1}. {doc_id}**")
+#         st.write(doc)
+# else:
+#     st.sidebar.info("Enter a topic in the sidebar to search the collection")
 
 model_to_use = st.sidebar.selectbox(
     "Which model?", ("gpt-4o-mini", "gpt-4o"), index=0
