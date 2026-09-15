@@ -1,6 +1,62 @@
 import streamlit as st
+import sys
+from pathlib import Path
+
+# ChromaDB requires a newer SQLite version on Streamlit Community Cloud.
+import pysqlite3
+
+sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+
+import chromadb
 import tiktoken
 from openai import OpenAI
+from PyPDF2 import PdfReader
+
+
+EMBEDDING_MODEL = "text-embedding-3-small"
+PDF_FOLDER = Path("./Lab-04-Data")
+
+
+def create_collection():
+    """Create or retrieve the persistent ChromaDB collection for Lab 4."""
+    chroma_client = chromadb.PersistentClient(path="./ChromaDB_for_Lab")
+    return chroma_client.get_or_create_collection("Lab4Collection")
+
+
+def add_to_collection(collection, text, file_name):
+    """Embed PDF text with OpenAI and add it to the ChromaDB collection."""
+    client = st.session_state.openai_client
+    response = client.embeddings.create(
+        input=text,
+        model=EMBEDDING_MODEL,
+    )
+    embedding = response.data[0].embedding
+
+    collection.add(
+        documents=[text],
+        ids=[file_name],
+        embeddings=[embedding],
+    )
+
+
+def extract_text_from_pdf(pdf_path):
+    """Extract and combine text from every page in a PDF."""
+    reader = PdfReader(pdf_path)
+    return "\n".join(page.extract_text() or "" for page in reader.pages).strip()
+
+
+def load_pdfs_to_collection(folder_path, collection):
+    """Extract, embed, and store every PDF in a folder."""
+    folder = Path(folder_path)
+    loaded_files = []
+
+    for pdf_path in sorted(folder.glob("*.pdf")):
+        text = extract_text_from_pdf(pdf_path)
+        if text:
+            add_to_collection(collection, text, pdf_path.name)
+            loaded_files.append(pdf_path.name)
+
+    return loaded_files
 
 # Show title and description.
 st.title("Conversational AI")
@@ -10,7 +66,7 @@ st.write(
 )
 
 model_to_use = st.sidebar.selectbox(
-    "Which model?", ("gpt-5-nano", "gpt-5-mini"), index=0
+    "Which model?", ("gpt-4o-mini", "gpt-4o"), index=0
 )
 max_tokens = st.sidebar.number_input(
     "Maximum context tokens",
