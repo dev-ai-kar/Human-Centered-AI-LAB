@@ -137,12 +137,12 @@ if st.button("Analyze", type="primary"):
 #    Responses API as an "input_image" block alongside an "input_text" block,
 #    so the model "sees" the pixels in one call. Audio takes two calls: the raw
 #    file bytes are first sent to the Audio Transcriptions endpoint
-#    (gpt-transcribe), which returns plain text; that transcript is then placed
+#    , which returns plain text; that transcript is then placed
 #    in an "input_text" block and sent to the Responses API. The model never
 #    hears the audio itself, only the text.
 #
 # b. What improved after the prompt revision? How was missing info handled?
-#    Version 1 (commented above) was a one-line prompt. Its output format
+#    Version 1  was a one-line prompt. Its output format
 #    varied, it sometimes answered unanswerable questions with outside
 #    knowledge or guesses, and it would follow text inside an image as if it
 #    were an instruction. The revised prompt enforces a consistent
@@ -158,7 +158,6 @@ if st.button("Analyze", type="primary"):
 #    sarcasm, pauses, speaker identity (who said what), background sounds,
 #    music, and non-speech cues; it can also mis-hear names, jargon, or
 #    accented/noisy speech. Video would additionally require extracting the
-#    audio track for transcription, sampling key frames (e.g., one every few
-#    seconds or on scene changes) and sending them as images, aligning frames
+#    audio track for transcription, sampling key frames and sending them as images, aligning frames
 #    with transcript timestamps, and handling much larger files and token
-#    costs (chunking long videos and combining the partial summaries).
+#    costs.
